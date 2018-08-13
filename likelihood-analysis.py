@@ -63,7 +63,25 @@ def extract_promoter_sequences(path, promoters):
 			for key, val in data.items():
 				file.write("%s\t%s\n" % (key, val))
 
-def  find_frequency_of_motifs(paths, motif):
+def find_frequency_of_motifs_genes(paths, motif):
+	frequency = []
+	names = []
+	for path in paths:
+		count = 0
+		names.append(path.split("/")[1].split(".txt")[0])
+		with open(path, "r") as handle:
+			for line in handle:
+				positions = find_motifs(motif, line)
+				count += len(positions)
+			frequency.append(count)
+	df = pd.DataFrame({
+		"Condition": names,
+		"AAAG frequency": frequency
+		})
+	df.to_csv("AAAG in conditions.csv",  index = False)
+	return frequency
+
+def find_frequency_of_motifs(paths, motif):
 	frequency = 0
 	for path in paths:
 		with open(path, "r") as handle:
@@ -87,7 +105,7 @@ def find_spacer_frequency_of_motifs(paths, motif, distance):
 	return spacer_frequency
 
 if __name__ == "__main__":
-	paths = ["at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.1.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.2.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.3.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.4.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.5.fa"]
+	#paths = ["at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.1.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.2.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.3.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.4.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.5.fa"]
 	motif = "AAAG"
 
 	#frequency = find_frequency_of_motifs(paths, motif)
@@ -104,9 +122,15 @@ if __name__ == "__main__":
 	df.to_csv("AAAG spacer frequency in at-genome.csv")
 	'''
 	#change_to_upper("Promoter Seq of A. thaliana genes.txt")
+	'''
 	promoters_path = "PromoterSequences.txt"
 	promoters = load_promoter_sequences(promoters_path)
 	newpath = "environmental-conditions-sequences"
 	if not os.path.exists(newpath):
 		os.makedirs(newpath)
 	extract_promoter_sequences("environmental-conditions/", promoters)
+	newpaths = []
+	for file in os.listdir("environmental-conditions-sequences-without-id/"):
+		newpaths.append("environmental-conditions-sequences-without-id/" + file)
+	find_frequency_of_motifs_genes(newpaths, motif)
+	'''
