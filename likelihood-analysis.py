@@ -47,17 +47,21 @@ def load_promoter_sequences(path):
 def extract_promoter_sequences(path, promoters):
 	os.chdir(path)
 	files = os.listdir(".")
+	all_data = []
 	for x in files:
-		proids = []
-		sequences = []
+		data = {}
 		with open(x, "r") as ids:
 			for line in ids:
-				proids.append(line.split('\n')[0])
-		for proid in proids:
-			sequences.append(promoters[proid])
-			print(proid)
-		print(sequences)
-		break
+				if line.split('\n')[0] in promoters:
+					proid = line.split('\n')[0]
+					data[proid] = promoters[proid].split('\n')[0]
+		all_data.append(data)
+	os.chdir("../environmental-conditions-sequences")
+	for i in range(len(files)):
+		with open(files[i], "w") as file:
+			data = all_data[i]
+			for key, val in data.items():
+				file.write("%s\t%s\n" % (key, val))
 
 def  find_frequency_of_motifs(paths, motif):
 	frequency = 0
@@ -100,7 +104,6 @@ if __name__ == "__main__":
 	df.to_csv("AAAG spacer frequency in at-genome.csv")
 	'''
 	#change_to_upper("Promoter Seq of A. thaliana genes.txt")
-	#with open("environmental-conditions/Baseline Growth Temp - All.txt", "r") as ins:
 	promoters_path = "PromoterSequences.txt"
 	promoters = load_promoter_sequences(promoters_path)
 	newpath = "environmental-conditions-sequences"
