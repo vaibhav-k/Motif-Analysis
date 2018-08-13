@@ -95,6 +95,25 @@ def find_spacer_frequency_of_motifs_genes(paths, motif, distance):
 			spacer_frequency.append(count)
 	return spacer_frequency
 
+def find_frequency_of_motifs_genes_names(newpaths, motif):
+	gene_count = []
+	names = []
+	for path in newpaths:
+		count = 0
+		names.append(path.split("/")[1].split(".txt")[0])
+		with open(path, "r") as handle:
+			for line in handle:
+				positions = find_motifs(motif, line)
+				if len(positions):
+					count += 1
+			gene_count.append(count)
+	df = pd.DataFrame({
+		"Condition": names,
+		"Number of genes with AAAG": gene_count
+		})
+	df.to_csv("Number of genes with AAAG in stress.csv",  index = False)
+	return gene_count
+
 def find_frequency_of_motifs(paths, motif):
 	frequency = 0
 	for path in paths:
@@ -121,7 +140,6 @@ def find_spacer_frequency_of_motifs(paths, motif, distance):
 if __name__ == "__main__":
 	#paths = ["at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.1.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.2.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.3.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.4.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.5.fa"]
 	motif = "AAAG"
-
 	#frequency = find_frequency_of_motifs(paths, motif)
 	found_frequency_AAAG = 910702
 	''''
@@ -158,4 +176,10 @@ if __name__ == "__main__":
 		spacer_frequency.append(occurences)
 		df["%d" % distance] = occurences
 	df.to_csv("AAAG spacer frequency conditions.csv", index = False)
+	'''
+	'''
+	newpaths = []
+	for file in os.listdir("environmental-conditions-sequences/"):
+		newpaths.append("environmental-conditions-sequences/" + file)
+	gene_count = find_frequency_of_motifs_genes_names(newpaths, motif)
 	'''
