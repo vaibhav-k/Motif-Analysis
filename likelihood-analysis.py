@@ -81,6 +81,20 @@ def find_frequency_of_motifs_genes(paths, motif):
 	df.to_csv("AAAG in conditions.csv",  index = False)
 	return frequency
 
+def find_spacer_frequency_of_motifs_genes(paths, motif, distance):
+	spacer_frequency = []
+	motif_length = len(motif)
+	for path in paths:
+		count = 0
+		with open(path, "r") as handle:
+			for line in handle:
+				positions = find_motifs(motif, line)
+				diff = find_distances_between_motifs(positions, motif_length)
+				start, end = find_start_end_positions(positions, diff, distance)
+				count += len(start)
+			spacer_frequency.append(count)
+	return spacer_frequency
+
 def find_frequency_of_motifs(paths, motif):
 	frequency = 0
 	for path in paths:
@@ -130,7 +144,18 @@ if __name__ == "__main__":
 		os.makedirs(newpath)
 	extract_promoter_sequences("environmental-conditions/", promoters)
 	newpaths = []
+	names = []
 	for file in os.listdir("environmental-conditions-sequences-without-id/"):
 		newpaths.append("environmental-conditions-sequences-without-id/" + file)
-	find_frequency_of_motifs_genes(newpaths, motif)
+		names.append(file.split(".txt")[0])
+	#find_frequency_of_motifs_genes(newpaths, motif)
+	df = pd.DataFrame({
+		"Conditions": names
+		})
+	spacer_frequency = []
+	for distance in range(0,31):
+		occurences = find_spacer_frequency_of_motifs_genes(newpaths, motif, distance)
+		spacer_frequency.append(occurences)
+		df["%d" % distance] = occurences
+	df.to_csv("AAAG spacer frequency conditions.csv", index = False)
 	'''
