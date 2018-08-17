@@ -114,6 +114,16 @@ def find_frequency_of_motifs_genes_names(newpaths, motif):
 	df.to_csv("Number of genes with AAAG in stress.csv",  index = False)
 	return gene_count
 
+def find_frequency_of_motifs_genes_genome(path, motif):
+	gene_count = 0
+	with open(path, "r") as handle:
+		for record in SeqIO.parse(handle, "fasta"):
+			genome = record.seq
+			positions = find_motifs(motif, genome)
+			if len(positions):
+				gene_count += 1
+	return gene_count
+
 def find_frequency_of_motifs(paths, motif):
 	frequency = 0
 	for path in paths:
@@ -138,10 +148,21 @@ def find_spacer_frequency_of_motifs(paths, motif, distance):
 	return spacer_frequency
 
 if __name__ == "__main__":
-	#paths = ["at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.1.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.2.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.3.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.4.fa", "at-genome/Arabidopsis_thaliana.TAIR10.dna.chromosome.5.fa"]
+	paths = []
+	for file in os.listdir("at-genome/"):
+		paths.append("at-genome/" + file)
+	newpaths = []
+	for file in os.listdir("environmental-conditions-sequences/"):
+		newpaths.append("environmental-conditions-sequences/" + file)
+	newerpaths = []
+	names = []
+	for file in os.listdir("environmental-conditions-sequences-without-id/"):
+		newerpaths.append("environmental-conditions-sequences-without-id/" + file)
+		names.append(file.split(".txt")[0])
 	motif = "AAAG"
 	#frequency = find_frequency_of_motifs(paths, motif)
-	found_frequency_AAAG = 910702
+	found_frequency_AAAG_genome = 910702
+
 	''''
 	spacer_frequency = []
 	for distance in range(0,31):
@@ -161,12 +182,12 @@ if __name__ == "__main__":
 	if not os.path.exists(newpath):
 		os.makedirs(newpath)
 	extract_promoter_sequences("environmental-conditions/", promoters)
-	newpaths = []
+	newerpaths = []
 	names = []
 	for file in os.listdir("environmental-conditions-sequences-without-id/"):
-		newpaths.append("environmental-conditions-sequences-without-id/" + file)
+		newerpaths.append("environmental-conditions-sequences-without-id/" + file)
 		names.append(file.split(".txt")[0])
-	#find_frequency_of_motifs_genes(newpaths, motif)
+	#find_frequency_of_motifs_genes(newerpaths, motif)
 	df = pd.DataFrame({
 		"Conditions": names
 		})
@@ -178,8 +199,8 @@ if __name__ == "__main__":
 	df.to_csv("AAAG spacer frequency conditions.csv", index = False)
 	'''
 	'''
-	newpaths = []
-	for file in os.listdir("environmental-conditions-sequences/"):
-		newpaths.append("environmental-conditions-sequences/" + file)
 	gene_count = find_frequency_of_motifs_genes_names(newpaths, motif)
 	'''
+	gene_count_genome = find_frequency_of_motifs_genes_genome("TAIR10_seq_20101214_updated.txt", motif)
+	#print(gene_count_genome)
+	found_num_genes_with_motif = 40355
